@@ -38,7 +38,7 @@ export const signin = async (req, res, next) => {
     // Generate JWT token for authentication
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
 
-    //Avoiding sending passwordback to user
+    //Avoiding sending password back to user
     const {password: pass, ...rest} = validUser._doc
 
     // Set the token in a cookie and send the user data along with the response
