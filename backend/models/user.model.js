@@ -15,9 +15,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    icon:{
+    avatar:{
         type: String,
-        default: "https://i0.wp.com/vssmn.org/wp-content/uploads/2018/12/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png?fit=860%2C681&ssl=1&w=640"
+        default: "https://cdn.pixabay.com/photo/2016/11/18/23/38/child-1837375_640.png"
     },
 
 }, {timestamps: true});
