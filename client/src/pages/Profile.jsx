@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
 import {
   getDownloadURL,
@@ -16,8 +16,8 @@ import {
   deleteUserSuccess,
   signOutUserStart,
 } from '../redux/user/userSlice';
-import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+
 export default function Profile() {
   const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -28,9 +28,9 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const [showListingsMessage, setShowListingsMessage] = useState(false); // New state for show listings message
+  const [showDoneMessage, setShowDoneMessage] = useState(false); // New state for done message
   const dispatch = useDispatch();
-
-
 
   useEffect(() => {
     if (file) {
@@ -58,6 +58,12 @@ export default function Profile() {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
           setFormData({ ...formData, avatar: downloadURL })
         );
+        // Set showDoneMessage to true when upload is finished
+        setShowDoneMessage(true);
+        // Clear the done message after 2 seconds
+        setTimeout(() => {
+          setShowDoneMessage(false);
+        }, 2000);
       }
     );
   };
@@ -82,7 +88,6 @@ export default function Profile() {
         dispatch(updateUserFailure(data.message));
         return;
       }
-
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
     } catch (error) {
@@ -118,7 +123,7 @@ export default function Profile() {
       }
       dispatch(deleteUserSuccess(data));
     } catch (error) {
-      dispatch(deleteUserFailure(data.message));
+      dispatch(deleteUserFailure(error.message));
     }
   };
 
@@ -131,8 +136,11 @@ export default function Profile() {
         setShowListingsError(true);
         return;
       }
-
       setUserListings(data);
+      // Set showListingsMessage to true if user has no listings
+      if (data.length === 0) {
+        setShowListingsMessage(true);
+      }
     } catch (error) {
       setShowListingsError(true);
     }
@@ -148,7 +156,6 @@ export default function Profile() {
         console.log(data.message);
         return;
       }
-
       setUserListings((prev) =>
         prev.filter((listing) => listing._id !== listingId)
       );
@@ -156,6 +163,7 @@ export default function Profile() {
       console.log(error.message);
     }
   };
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -176,12 +184,12 @@ export default function Profile() {
         <p className='text-sm self-center'>
           {fileUploadError ? (
             <span className='text-red-700'>
-              Error Image upload (image must be less than 2 mb)
+              Error: Image upload failed (image must be less than 2 mb)
             </span>
           ) : filePerc > 0 && filePerc < 100 ? (
             <span className='text-slate-700'>{`Uploading ${filePerc}%`}</span>
           ) : filePerc === 100 ? (
-            <span className='text-green-700'>Image successfully uploaded!</span>
+            <span className='text-green-700'>Done!</span>
           ) : (
             ''
           )}
@@ -233,7 +241,6 @@ export default function Profile() {
           Sign out
         </span>
       </div>
-
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-700 mt-5'>
         {updateSuccess ? 'User is updated successfully!' : ''}
@@ -244,7 +251,9 @@ export default function Profile() {
       <p className='text-red-700 mt-5'>
         {showListingsError ? 'Error showing listings' : ''}
       </p>
-
+      {showListingsMessage && (
+        <p className='text-red-700 mt-5'>You do not have listings.</p>
+      )}
       {userListings && userListings.length > 0 && (
         <div className='flex flex-col gap-4'>
           <h1 className='text-center mt-7 text-2xl font-semibold'>
@@ -268,7 +277,6 @@ export default function Profile() {
               >
                 <p>{listing.name}</p>
               </Link>
-
               <div className='flex flex-col item-center'>
                 <button
                   onClick={() => handleListingDelete(listing._id)}

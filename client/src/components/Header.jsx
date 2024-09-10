@@ -15,6 +15,8 @@ export default function Header() {
     urlParams.set("searchTerm", searchTerm);
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
+
+    setSearchTerm(" ");
   };
 
   useEffect(() => {
@@ -61,14 +63,14 @@ export default function Header() {
             </li>
           </Link>
           <Link to="/profile">
-            {currentUser ? (
+            {currentUser && currentUser.avatar ? (
               <img
                 className="rounded-full h-7 w-7 object-cover"
                 src={currentUser.avatar}
                 alt="profile"
               />
             ) : (
-              <li className=" text-slate-700 hover:underline"> Sign in</li>
+              <li className="text-slate-700 hover:underline">Sign In</li>
             )}
           </Link>
         </ul>
